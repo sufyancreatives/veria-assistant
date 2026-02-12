@@ -1,0 +1,30 @@
+/* ===================================================
+   GALAXY BACKGROUND CANVAS
+=================================================== */
+
+.three-bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -3;
+    pointer-events: none;
+}
+
+/* Add subtle nebula glow effect */
+.three-bg-canvas::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: 80%;
+    background: radial-gradient(ellipse at center,
+            rgba(138, 43, 226, 0.03) 0%,
+            rgba(75, 0, 130, 0.02) 30%,
+            transparent 70%);
+    pointer-events: none;
+    z-index: -2;
+}

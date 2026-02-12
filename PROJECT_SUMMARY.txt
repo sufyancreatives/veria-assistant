@@ -1,0 +1,620 @@
+================================================================================
+                    SERENITY - MENTAL WELLNESS CHATBOT
+                         PROJECT SUMMARY DOCUMENT
+================================================================================
+
+Project Name: Serenity - Mental Wellness AI Companion
+Tech Stack: React (Frontend) + Express.js (Backend) + OpenAI GPT-4.1
+Created: February 2026
+Repository: hackathon/
+
+
+================================================================================
+                          TABLE OF CONTENTS
+================================================================================
+
+1. PROJECT OVERVIEW
+2. ARCHITECTURE & STRUCTURE
+3. FRONTEND DETAILS
+   3.1 Technology Stack
+   3.2 Page Components
+   3.3 UI Components
+   3.4 Design System & Styling
+   3.5 Mouse Tracking UI Features
+   3.6 Routing
+4. BACKEND DETAILS
+   4.1 Technology Stack
+   4.2 API Endpoints
+   4.3 System Prompt & Safety
+   4.4 Environment Configuration
+5. KEY FEATURES
+6. DEPENDENCIES
+7. HOW TO RUN
+8. DEPLOYMENT NOTES
+
+
+================================================================================
+                         1. PROJECT OVERVIEW
+================================================================================
+
+Serenity is an AI-powered mental wellness chatbot designed to provide 
+empathetic emotional support and gentle coping strategies. It uses OpenAI's 
+GPT-4.1 model to generate thoughtful, supportive responses in a safe, 
+non-judgmental environment.
+
+PURPOSE:
+- Offer a safe space for users to talk about their feelings
+- Provide active listening and emotional validation
+- Suggest general coping and relaxation techniques
+- Encourage seeking professional help when needed
+- Provide crisis resources for users in immediate danger
+
+IMPORTANT LIMITATIONS:
+- NOT a licensed therapist or medical professional
+- Cannot diagnose, treat, or prescribe medications
+- Not a substitute for professional mental health care
+- Not an emergency crisis intervention service
+
+
+================================================================================
+                     2. ARCHITECTURE & STRUCTURE
+================================================================================
+
+Project Structure:
+hackathon/
+├── mental-wellness-bot/          # Frontend (React + Vite)
+│   ├── src/
+│   │   ├── components/           # Reusable UI components
+│   │   ├── pages/                # Route pages
+│   │   ├── hooks/                # Custom React hooks
+│   │   ├── App.jsx               # Main app component
+│   │   ├── main.jsx             # Entry point
+│   │   └── index.css            # Global styles
+│   ├── public/                   # Static assets
+│   ├── dist/                     # Production build
+│   ├── index.html               # HTML template
+│   ├── package.json             # Frontend dependencies
+│   └── vite.config.js           # Vite configuration
+│
+├── server/                       # Backend (Express + OpenAI)
+│   ├── index.js                 # Main server file
+│   ├── package.json             # Backend dependencies
+│   ├── .env                     # Environment variables
+│   └── node_modules/            # Backend packages
+│
+└── backend/                      # (Legacy/alternative backend)
+
+
+Architecture Pattern: Separated Frontend & Backend
+- Frontend runs on Vite dev server (localhost:5173)
+- Backend runs on Express server (localhost:4000)
+- Communication via REST API using fetch()
+- CORS enabled for cross-origin requests
+
+
+================================================================================
+                        3. FRONTEND DETAILS
+================================================================================
+
+3.1 TECHNOLOGY STACK
+────────────────────────────────────────────────────────────────────────────────
+Framework:       React 19.2.0
+Build Tool:      Vite 7.3.1
+Routing:         React Router DOM 7.13.0
+Styling:         Vanilla CSS with CSS Variables
+Typography:      Inter font family (Google Fonts)
+State Mgmt:      React Hooks (useState, useRef, useEffect)
+Browser Target:  Modern browsers (ES6+)
+
+
+3.2 PAGE COMPONENTS
+────────────────────────────────────────────────────────────────────────────────
+
+📄 Onboarding.jsx (Route: "/")
+   - Landing page with branding and introduction
+   - Displays welcome message, feature highlights
+   - Important disclaimer section with crisis hotlines
+   - Consent checkbox agreement
+   - "Begin Your Journey" CTA button
+   - 3D cursor tracking on cards
+   - Ambient background orbs for visual depth
+
+📄 Chat.jsx (Route: "/chat")
+   - Main chat interface with AI companion
+   - Real-time message history display
+   - Auto-scrolling message list
+   - Header with bot status (Online/Thinking)
+   - Crisis button (🆘 I'm in crisis) in header
+   - Disclaimer banner below header
+   - Message input with auto-resize textarea
+   - Loading state with typing indicator
+   - API integration with backend (localhost:4000)
+
+📄 Info.jsx (Route: "/info")
+   - Comprehensive information about Serenity
+   - What Serenity can help with
+   - Important limitations section
+   - Privacy & data usage policy
+   - Crisis resources section
+   - 3D cursor tracking on all info cards
+   - Back to chat navigation
+
+
+3.3 UI COMPONENTS
+────────────────────────────────────────────────────────────────────────────────
+
+🧩 MessageList.jsx
+   - Displays array of messages (user + bot)
+   - Each message has avatar (bot only)
+   - Message bubbles with different styles for user/bot
+   - Typing indicator animation (3 dots)
+   - 3D cursor tracking on latest bot message
+   - Smooth fade-in animations
+   - Supports multiline messages
+
+🧩 MessageInput.jsx
+   - Auto-resizing textarea (max 120px height)
+   - Submit on Enter (Shift+Enter for new line)
+   - Send button with icon
+   - Disabled state during bot response
+   - Glassmorphism design
+   - Custom placeholder text
+
+🧩 CrisisBanner.jsx
+   - Modal overlay for crisis resources
+   - 4 crisis resource cards:
+     1. 988 Suicide & Crisis Lifeline
+     2. Crisis Text Line (HOME to 741741)
+     3. Emergency Services (911)
+     4. International Crisis Centers
+   - Clickable links (tel: and sms: protocols)
+   - Empathetic messaging
+   - Close button
+
+🧩 MouseTracker.jsx
+   - Custom glowing cursor (16px blue circle)
+   - Mouse-tracking radial gradient background
+   - Noise texture overlay for depth
+   - Auto-hides on touch devices
+   - Respects prefers-reduced-motion accessibility
+
+
+3.4 DESIGN SYSTEM & STYLING
+────────────────────────────────────────────────────────────────────────────────
+
+Design Philosophy: Premium, Calm, Therapeutic Aesthetic
+
+COLOR PALETTE (CSS Variables):
+  - Background:
+    --color-bg-primary: #0E0F13 (Deep Charcoal)
+    --color-bg-secondary: #1a1b23
+    --color-bg-glass: rgba(45, 46, 56, 0.6) (Glassmorphism)
+  
+  - Accent Gradients:
+    --color-accent-gradient: linear-gradient(135deg, #6EE7F9, #A78BFA)
+    --color-accent-trust: linear-gradient(135deg, #5EEAD4, #60A5FA)
+  
+  - Text:
+    --color-text-primary: #F4F6FA (Soft Off-White)
+    --color-text-secondary: #9AA3B2 (Muted Slate)
+    --color-text-muted: #6e7685
+  
+  - Wellness Green:
+    --color-wellness: #34d399
+  
+  - Crisis (Warm Amber, non-alarming):
+    --color-crisis: #f59e0b
+
+TYPOGRAPHY:
+  - Font Family: 'Inter' (Google Fonts)
+  - Sizes: 0.75rem to 2.75rem
+  - Line Height: 1.7 (relaxed for calm reading)
+  - Anti-aliasing enabled
+
+SPACING SYSTEM:
+  - Based on 0.25rem increments
+  - --space-1 (0.25rem) to --space-16 (4rem)
+
+BORDER RADIUS:
+  - --radius-sm: 8px
+  - --radius-md: 12px
+  - --radius-lg: 16px
+  - --radius-xl: 24px
+  - --radius-full: 9999px
+
+TRANSITIONS:
+  - --transition-fast: 300ms cubic-bezier(0.4, 0, 0.2, 1)
+  - --transition-normal: 400ms cubic-bezier(0.4, 0, 0.2, 1)
+  - --transition-slow: 600ms cubic-bezier(0.4, 0, 0.2, 1)
+  - Calm, slow transitions (300-600ms spec)
+
+UTILITY CLASSES:
+  .glass              - Glassmorphism effect with blur
+  .glass-elevated     - Enhanced glass with more blur
+  .glow               - Glow shadow effect
+  .card-3d            - 3D card hover effects
+  .cursor-track       - Cursor-reactive transforms
+  .btn                - Base button styles
+  .btn-primary        - Primary gradient button
+  .btn-outline        - Outlined button
+  .btn-crisis         - Crisis resource button
+
+ANIMATIONS:
+  - fadeInUp, fadeIn, slideInLeft, slideInRight
+  - pulse, breathe, gradientShift, float, shimmer
+  - Reduced motion support (@prefers-reduced-motion)
+
+
+3.5 MOUSE TRACKING UI FEATURES
+────────────────────────────────────────────────────────────────────────────────
+
+Custom Cursor:
+  - 16px blue glowing circle
+  - Follows mouse with smooth tracking
+  - Box shadow: 0 0 20px rgba(130, 170, 255, 0.8)
+  - Replaces default cursor (body: cursor: none)
+
+Mouse-Tracking Background:
+  - Radial gradient that follows mouse position
+  - Creates dynamic ambient lighting effect
+  - CSS custom properties: --mouse-x, --mouse-y
+  - Smooth transition on mouse movement
+
+Noise Texture:
+  - Subtle grain overlay (opacity: 0.05)
+  - Adds depth and premium feel
+  - External SVG from grainy-gradients.vercel.app
+
+3D Cursor Tracking Effects:
+  - Custom hook: useCursorTracking()
+  - Applies 3D transforms based on cursor position
+  - Used on cards, latest bot message
+  - Configurable maxMovement and maxRotation
+
+Accessibility:
+  - Auto-disables on touch devices (@media pointer: coarse)
+  - Respects prefers-reduced-motion
+  - Falls back to default cursor when disabled
+
+
+3.6 ROUTING
+────────────────────────────────────────────────────────────────────────────────
+
+Router: React Router DOM (BrowserRouter)
+
+Routes:
+  /           → Onboarding page
+  /chat       → Chat interface
+  /info       → Information page
+  /*          → Redirect to / (catch-all)
+
+Navigation:
+  - Programmatic navigation via useNavigate() hook
+  - Back buttons on Chat and Info pages
+  - "Begin Your Journey" button on Onboarding
+  - No authentication/protected routes
+
+
+================================================================================
+                        4. BACKEND DETAILS
+================================================================================
+
+4.1 TECHNOLOGY STACK
+────────────────────────────────────────────────────────────────────────────────
+Runtime:         Node.js
+Framework:       Express.js 5.2.1
+AI Provider:     OpenAI SDK 6.21.0
+Model:           GPT-4.1
+Environment:     dotenv 17.2.4
+Cross-Origin:    CORS 2.8.6
+Type:            ES Modules (type: "module")
+
+
+4.2 API ENDPOINTS
+────────────────────────────────────────────────────────────────────────────────
+
+POST /api/chat
+  Description: Main chat endpoint for AI responses
+  Request Body:
+    {
+      "messages": [
+        { "role": "user", "content": "..." },
+        { "role": "assistant", "content": "..." }
+      ]
+    }
+  Response:
+    {
+      "reply": "AI-generated response text"
+    }
+  Error Response:
+    {
+      "error": "Error message"
+    }
+  Process:
+    1. Validates messages array
+    2. Prepends system prompt
+    3. Calls OpenAI responses.create()
+    4. Extracts output_text or output[0].content[0].text
+    5. Returns reply to frontend
+
+GET /api/health
+  Description: Health check endpoint
+  Response:
+    {
+      "status": "ok",
+      "timestamp": "2026-02-12T13:37:42.000Z"
+    }
+
+
+4.3 SYSTEM PROMPT & SAFETY
+────────────────────────────────────────────────────────────────────────────────
+
+Role Definition:
+  - Supportive, empathetic mental wellness companion
+  - Named "Serenity"
+  - Warm, conversational tone
+  - Short paragraphs (2-4 max)
+  - Gentle, open-ended questions
+
+Core Guidelines:
+  ✓ Offer emotional support and active listening
+  ✓ Help users reflect on thoughts/feelings
+  ✓ Normalize seeking professional help
+  ✓ Use empathetic, validating language
+  ✓ Occasional gentle emoji (💙, 🌿, ✨)
+
+Strict Limitations:
+  ✗ NOT a therapist, doctor, or crisis counselor
+  ✗ Cannot diagnose, treat, or cure conditions
+  ✗ Cannot give medical, legal, or professional advice
+  ✗ Cannot recommend medications or dosages
+  ✗ Cannot provide emergency crisis intervention
+
+Safety Protocols:
+  - If user mentions self-harm or suicide:
+    → Respond with empathy
+    → STRONGLY encourage immediate help
+    → Provide crisis resources:
+      • 988 (National Suicide Prevention Lifeline)
+      • Crisis Text Line: HOME to 741741
+      • 911 or local emergency services
+      • IASP Crisis Centers
+  - Never provide instructions for self-harm
+  - Always prioritize user safety above all
+
+
+4.4 ENVIRONMENT CONFIGURATION
+────────────────────────────────────────────────────────────────────────────────
+
+File: server/.env
+
+Required Variables:
+  OPENAI_API_KEY=your_openai_api_key_here
+  PORT=4000 (optional, defaults to 4000)
+
+Security:
+  - .env file is gitignored
+  - API key validation on server start
+  - Warning logged if key is missing or placeholder
+
+
+================================================================================
+                          5. KEY FEATURES
+================================================================================
+
+🌟 CORE FEATURES:
+────────────────────────────────────────────────────────────────────────────────
+
+1. Real-Time AI Chat
+   - Powered by OpenAI GPT-4.1
+   - Empathetic, supportive responses
+   - Conversation history context
+   - Typing indicator during response
+
+2. Onboarding Experience
+   - Welcoming brand introduction
+   - Feature highlights with icons
+   - Comprehensive disclaimer
+   - Informed consent checkbox
+   - Smooth animations
+
+3. Crisis Support Resources
+   - Dedicated crisis button in header
+   - Modal with clickable hotline links
+   - tel: and sms: protocol support
+   - International resources included
+   - 24/7 availability information
+
+4. Premium UI/UX
+   - Glassmorphism design
+   - Custom glowing cursor
+   - Mouse-tracking gradient background
+   - 3D card hover effects
+   - Smooth animations (400-600ms)
+   - Ambient orbs on onboarding
+
+5. Accessibility
+   - Reduced motion support
+   - Touch device compatibility
+   - Auto-hide custom cursor on touch
+   - Keyboard navigation (Enter to send)
+   - High contrast text
+   - Semantic HTML
+
+6. Privacy & Safety
+   - No message storage after session
+   - Built-in safety protocols
+   - Clear disclaimer messaging
+   - Professional help encouragement
+
+
+🛡️ SAFETY FEATURES:
+────────────────────────────────────────────────────────────────────────────────
+
+✓ System-level prompt limitations
+✓ Crisis detection and resource provision
+✓ Disclaimer on every relevant page
+✓ Consent required before chat access
+✓ "I'm in crisis" button always visible
+✓ Non-alarmist crisis button styling (warm amber)
+
+
+================================================================================
+                          6. DEPENDENCIES
+================================================================================
+
+FRONTEND (mental-wellness-bot/package.json):
+────────────────────────────────────────────────────────────────────────────────
+Production:
+  - react: ^19.2.0
+  - react-dom: ^19.2.0
+  - react-router-dom: ^7.13.0
+
+Development:
+  - @vitejs/plugin-react: ^5.1.1
+  - vite: ^7.3.1
+  - eslint: ^9.39.1
+  - @eslint/js: ^9.39.1
+  - eslint-plugin-react-hooks: ^7.0.1
+  - eslint-plugin-react-refresh: ^0.4.24
+  - @types/react: ^19.2.7
+  - @types/react-dom: ^19.2.3
+  - globals: ^16.5.0
+
+
+BACKEND (server/package.json):
+────────────────────────────────────────────────────────────────────────────────
+Production:
+  - express: ^5.2.1
+  - openai: ^6.21.0
+  - cors: ^2.8.6
+  - dotenv: ^17.2.4
+
+Total Packages: ~20 (frontend) + ~4 (backend)
+
+
+================================================================================
+                          7. HOW TO RUN
+================================================================================
+
+PREREQUISITES:
+────────────────────────────────────────────────────────────────────────────────
+- Node.js (v16+ recommended)
+- npm (comes with Node.js)
+- OpenAI API key
+
+
+SETUP INSTRUCTIONS:
+────────────────────────────────────────────────────────────────────────────────
+
+1. Install Frontend Dependencies:
+   cd mental-wellness-bot
+   npm install
+
+2. Install Backend Dependencies:
+   cd ../server
+   npm install
+
+3. Configure Environment:
+   cd server
+   Create .env file:
+     OPENAI_API_KEY=your_actual_openai_api_key
+     PORT=4000
+
+4. Start Backend Server:
+   cd server
+   npm start
+   → Server runs on http://localhost:4000
+
+5. Start Frontend Dev Server:
+   cd mental-wellness-bot
+   npm run dev
+   → Frontend runs on http://localhost:5173
+
+6. Access Application:
+   Open browser to http://localhost:5173
+
+
+PRODUCTION BUILD:
+────────────────────────────────────────────────────────────────────────────────
+
+Build Frontend:
+  cd mental-wellness-bot
+  npm run build
+  → Output to dist/ directory
+
+Preview Production Build:
+  npm run preview
+  → Runs local server for built files
+
+
+================================================================================
+                       8. DEPLOYMENT NOTES
+================================================================================
+
+FRONTEND DEPLOYMENT:
+────────────────────────────────────────────────────────────────────────────────
+Recommended Platforms: Vercel, Netlify, GitHub Pages
+Build Command: npm run build
+Output Directory: dist/
+Routing: Requires SPA fallback (all routes → index.html)
+
+Environment Variable (if needed):
+  VITE_API_URL=https://your-backend-url.com
+
+
+BACKEND DEPLOYMENT:
+────────────────────────────────────────────────────────────────────────────────
+Recommended Platforms: Render, Railway, Heroku, DigitalOcean
+Start Command: npm start
+Port: Process.env.PORT (dynamic)
+Environment Variables:
+  - OPENAI_API_KEY (required)
+  - PORT (optional, platform-provided)
+
+CORS Configuration:
+  - Update cors() options to allow frontend domain
+  - Example: cors({ origin: 'https://your-frontend.com' })
+
+SECURITY CHECKLIST:
+────────────────────────────────────────────────────────────────────────────────
+✓ Never commit .env file
+✓ Use environment variables for API keys
+✓ Enable HTTPS in production
+✓ Rate limiting for /api/chat endpoint (recommended)
+✓ Input validation and sanitization
+✓ CORS restricted to frontend domain
+✓ Security headers (helmet.js recommended)
+
+
+MONITORING:
+────────────────────────────────────────────────────────────────────────────────
+- Monitor OpenAI API usage and costs
+- Log errors for debugging (Winston, Pino)
+- Track user metrics (optional, anonymized)
+- Health check endpoint: GET /api/health
+
+
+================================================================================
+                            CONCLUSION
+================================================================================
+
+Serenity is a production-ready mental wellness chatbot with a focus on:
+  - User safety and ethical AI usage
+  - Premium, accessible UI/UX design
+  - Clear communication of limitations
+  - Crisis resource accessibility
+  - Professional mental health encouragement
+
+The project demonstrates modern web development best practices:
+  - Clean separation of concerns (frontend/backend)
+  - Component-based architecture
+  - Responsive, accessible design
+  - Ethical AI integration
+  - Privacy-conscious implementation
+
+For questions or contributions, refer to the codebase documentation.
+
+================================================================================
+                      END OF PROJECT SUMMARY
+================================================================================

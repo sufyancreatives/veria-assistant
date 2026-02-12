@@ -1,0 +1,148 @@
+/* ── Crisis Modal ──────────────────────────────────────────────── */
+.crisis-modal {
+    text-align: center;
+}
+
+.crisis-modal-header {
+    margin-bottom: var(--space-6);
+}
+
+.crisis-icon-large {
+    font-size: 3rem;
+    margin-bottom: var(--space-3);
+    animation: breathe 3s ease-in-out infinite;
+}
+
+.crisis-modal-header h2 {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-2);
+}
+
+.crisis-modal-header p {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+}
+
+/* ── Resource Grid ────────────────────────────────────────────── */
+.crisis-resources-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+}
+
+.crisis-resource-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    text-align: left;
+    text-decoration: none;
+    color: inherit;
+    transition: all var(--transition-fast);
+}
+
+.crisis-resource-card:hover {
+    border-color: var(--color-border-hover);
+    background: var(--color-bg-elevated);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.resource-urgent {
+    border-color: rgba(245, 158, 11, 0.3);
+    background: var(--color-crisis-soft);
+}
+
+.resource-urgent:hover {
+    border-color: var(--color-crisis);
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.15);
+}
+
+.resource-emergency {
+    border-color: rgba(251, 191, 36, 0.25);
+    background: rgba(251, 191, 36, 0.08);
+}
+
+.resource-icon {
+    font-size: 1.8rem;
+    flex-shrink: 0;
+}
+
+.resource-info h3 {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-1);
+}
+
+.resource-info p {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.resource-info strong {
+    color: var(--color-text-primary);
+}
+
+.resource-tag {
+    display: inline-block;
+    margin-top: var(--space-1);
+    font-size: var(--font-size-xs);
+    color: var(--color-wellness);
+    font-weight: 500;
+}
+
+/* ── Reminder ─────────────────────────────────────────────────── */
+.crisis-reminder {
+    padding: var(--space-4);
+    background: var(--color-wellness-soft);
+    border: 1px solid rgba(52, 211, 153, 0.2);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-5);
+}
+
+.crisis-reminder p {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+}
+
+/* ── Close Button ─────────────────────────────────────────────── */
+.crisis-close-btn {
+    width: 100%;
+}
+
+/* ── Action Buttons ──────────────────────────────────────────── */
+.resource-action {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #6EE7F9, #A78BFA);
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(110, 231, 249, 0.3);
+}
+
+.crisis-resource-card:hover .resource-action {
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(110, 231, 249, 0.5);
+}
+
+.resource-action-urgent {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+}
+
+.crisis-resource-card:hover .resource-action-urgent {
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.6);
+}

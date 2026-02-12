@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>VERIA ASSISTANT - AI Interface</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        /* =====================================================
+   GLOBAL
+===================================================== */
+
+        :root {
+            --bg: #0e1117;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #8b5cf6;
+            --accent2: #22d3ee;
+            --text: #f3f4f6;
+            --muted: #9ca3af;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+        }
+
+        /* =====================================================
+   3D WEBGL BACKGROUND
+===================================================== */
+
+        #bg {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+
+        /* =====================================================
+   LAYOUT
+===================================================== */
+
+        .app {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+
+        .sidebar {
+            width: 260px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.6));
+        }
+
+        .new-chat {
+            padding: 10px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border: none;
+            margin-bottom: 20px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .new-chat:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
+        }
+
+        .chat-history {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .chat-history div {
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chat-history div:hover {
+            background: rgba(255, 255, 255, .05);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        /* Main Chat */
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            border-bottom: 1px solid var(--border);
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+        }
+
+        .status {
+            color: #22c55e;
+            font-size: 14px;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .message {
+            max-width: 60%;
+            padding: 14px 18px;
+            border-radius: 16px;
+            line-height: 1.6;
+            animation: fadeIn .3s ease;
+        }
+
+        .bot {
+            background: rgba(255, 255, 255, .06);
+        }
+
+        .user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: black;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        /* Input Area */
+
+        .input-area {
+            padding: 20px;
+            border-top: 1px solid var(--border);
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .attach-preview {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .file-box {
+            background: rgba(255, 255, 255, .08);
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .file-box button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        textarea {
+            flex: 1;
+            resize: none;
+            border: none;
+            outline: none;
+            padding: 12px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, .05);
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .send-btn {
+            padding: 0 20px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
+        }
+
+        .upload-btn {
+            background: rgba(255, 255, 255, .08);
+            border: none;
+            padding: 0 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            color: white;
+            transition: all 0.2s ease;
+        }
+
+        .upload-btn:hover {
+            background: rgba(255, 255, 255, .12);
+            transform: scale(1.1);
+        }
+
+        @media(max-width:900px) {
+            .sidebar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="bg"></canvas>
+
+    <div class="app">
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">VERIA ASSISTANT</div>
+            <button class="new-chat">+ New Chat</button>
+            <div class="chat-history">
+                <div>Reflection Session</div>
+                <div>Anxiety Talk</div>
+                <div>Daily Check-in</div>
+                <div>Wellness Goals</div>
+                <div>Stress Management</div>
+            </div>
+        </div>
+
+        <!-- Main -->
+        <div class="main">
+            <div class="topbar">
+                <div>AI Wellness Companion</div>
+                <div class="status">● Online</div>
+            </div>
+
+            <div class="messages" id="messages">
+                <div class="message bot">
+                    Hello 💙 I'm VERIA ASSISTANT.<br>
+                    You can upload a file or start chatting about how you're feeling.
+                </div>
+            </div>
+
+            <div class="input-area">
+
+                <div class="attach-preview" id="preview"></div>
+
+                <div class="input-row">
+                    <button class="upload-btn" onclick="document.getElementById('file').click()">📎</button>
+                    <input type="file" id="file" hidden multiple>
+                    <textarea id="input" rows="1" placeholder="Share what's on your mind..."
+                        onkeydown="handleEnter(event)"></textarea>
+                    <button class="send-btn" onclick="sendMessage()">Send</button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+
+        /* =====================================================
+           THREE JS 3D BACKGROUND
+        ===================================================== */
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg'), alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.position.z = 5;
+
+        const geometry = new THREE.BufferGeometry();
+        const particles = 1500;
+        const positions = new Float32Array(particles * 3);
+        const colors = new Float32Array(particles * 3);
+
+        for (let i = 0; i < particles * 3; i += 3) {
+            positions[i] = (Math.random() - 0.5) * 20;
+            positions[i + 1] = (Math.random() - 0.5) * 20;
+            positions[i + 2] = (Math.random() - 0.5) * 20;
+
+            // Color variation (purple to cyan)
+            const colorMix = Math.random();
+            colors[i] = 0.5 + colorMix * 0.3;
+            colors[i + 1] = 0.7 + colorMix * 0.2;
+            colors[i + 2] = 0.9 + colorMix * 0.1;
+        }
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        const material = new THREE.PointsMaterial({
+            size: 0.03,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.8
+        });
+        const points = new THREE.Points(geometry, material);
+        scene.add(points);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            points.rotation.y += 0.0008;
+            points.rotation.x += 0.0004;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        /* =====================================================
+           CHAT + FILE UI
+        ===================================================== */
+
+        const fileInput = document.getElementById("file");
+        const preview = document.getElementById("preview");
+
+        fileInput.addEventListener("change", () => {
+            preview.innerHTML = "";
+            [...fileInput.files].forEach((file, index) => {
+                const box = document.createElement("div");
+                box.className = "file-box";
+                box.innerHTML = `${file.name} <button onclick="removeFile(${index})">×</button>`;
+                preview.appendChild(box);
+            });
+        });
+
+        function removeFile(index) {
+            const dt = new DataTransfer();
+            [...fileInput.files].forEach((file, i) => { if (i !== index) dt.items.add(file); });
+            fileInput.files = dt.files;
+            fileInput.dispatchEvent(new Event('change'));
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById("input");
+            if (!input.value.trim()) return;
+
+            const user = document.createElement("div");
+            user.className = "message user";
+            user.innerText = input.value;
+            messages.appendChild(user);
+            messages.scrollTop = messages.scrollHeight;
+
+            // Simulate AI response
+            setTimeout(() => {
+                const reply = document.createElement("div");
+                reply.className = "message bot";
+                reply.innerHTML = "Thanks for sharing 💙<br>I'm here to listen and support you. Would you like to talk more about how you're feeling?";
+                messages.appendChild(reply);
+                messages.scrollTop = messages.scrollHeight;
+            }, 1000);
+
+            input.value = "";
+            preview.innerHTML = "";
+            fileInput.value = "";
+        }
+
+        // New Chat button functionality
+        document.querySelector('.new-chat').addEventListener('click', () => {
+            if (confirm('Start a new conversation? Current chat will be lost.')) {
+                messages.innerHTML = `
+      <div class="message bot">
+        Hello 💙 I'm VERIA ASSISTANT.<br>
+        You can upload a file or start chatting about how you're feeling.
+      </div>
+    `;
+            }
+        });
+
+    </script>
+
+</body>
+
+</html>

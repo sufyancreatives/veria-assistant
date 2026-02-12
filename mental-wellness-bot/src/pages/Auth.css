@@ -1,0 +1,124 @@
+/* Scoped to avoid global conflicts */
+.auth-container {
+    width: 400px;
+    max-width: 90%;
+    background: rgba(45, 46, 56, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    /* Center it in the page (App.jsx layout handles this via flex/grid usually, but let's ensure it) */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    margin-bottom: 2rem;
+    justify-content: space-around;
+    cursor: pointer;
+}
+
+.tab {
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    transition: 0.3s;
+    color: #F4F6FA;
+    font-weight: 600;
+}
+
+.tab.active {
+    background: linear-gradient(135deg, #6EE7F9, #A78BFA);
+    color: #0f0f0f;
+}
+
+/* Forms */
+.auth-container input {
+    width: 100%;
+    margin: 0.75rem 0;
+    padding: 0.75rem;
+    border-radius: 12px;
+    border: none;
+    outline: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: #F4F6FA;
+    font-size: 1rem;
+}
+
+.auth-container input::placeholder {
+    color: rgba(244, 246, 250, 0.6);
+}
+
+.auth-container button {
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #6EE7F9, #A78BFA);
+    color: #0f0f0f;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 0.5rem;
+}
+
+.auth-container button:hover {
+    transform: scale(1.05);
+}
+
+/* Form containers */
+.form-content {
+    display: none;
+    flex-direction: column;
+}
+
+.form-content.active {
+    display: flex;
+}
+
+/* Forgot password link */
+.forgot {
+    text-align: right;
+    font-size: 0.9rem;
+    color: #9AA3B2;
+    margin-top: -0.5rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.forgot:hover {
+    color: #6EE7F9;
+}
+
+/* Smooth fade animation */
+.fade {
+    animation: fadeIn 0.5s ease forwards;
+    opacity: 0;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+/* Responsive */
+@media(max-width: 450px) {
+    .auth-container {
+        padding: 1rem;
+    }
+
+    .auth-container input {
+        font-size: 0.9rem;
+    }
+
+    .auth-container button {
+        font-size: 0.9rem;
+    }
+}
