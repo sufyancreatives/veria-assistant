@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Groq from 'groq-sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import fs from 'fs';
 import path from 'path';
 
-// Initialize Groq SDK
-const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY,
-});
+// Initialize Gemini SDK
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
 // System prompt for mental wellness chatbot
 const SYSTEM_PROMPT = `
@@ -55,85 +54,81 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        let hasImages = false;
+        const promptParts: any[] = [];
 
-        // Process messages to convert [Image: ...] tags to Groq vision format
-        const processedMessages = messages.map((msg: any) => {
-            // Regex to find [Image: /uploads/filename]
-            const imgRegex = /\[Image: \/uploads\/(.*?)\]/g;
-            const matches = [...msg.content.matchAll(imgRegex)];
+        // Add system prompt as the first part of the conversation context if possible, 
+        // or just prepend it to the first user message. 
+        // Gemini 1.5 Flash supports system instructions in the model config, but for simplicity
+        // in a single turn HTTP request or chat session, we can prepend it.
+        // Actually, let's use the chat history format.
 
-            if (matches.length === 0) {
-                return {
-                    role: msg.role,
-                    content: msg.content,
-                };
-            }
+        const history = messages.slice(0, -1).map((msg: any) => ({
+            role: msg.role === 'assistant' ? 'model' : 'user',
+            parts: [{ text: msg.content.replace(/\[Image:.*?\]/g, '').trim() }],
+        }));
 
-            hasImages = true;
-            const contentParts: any[] = [];
+        // Initial system instruction can be handled by starting the chat with it or using systemInstruction
+        // config if available in the SDK version. For safety, we'll strip it into the model config.
 
-            // Add text part (with image markers removed)
-            const textContent = msg.content.replace(imgRegex, '').trim();
-            if (textContent) {
-                contentParts.push({ type: 'text', text: textContent });
-            }
+        const chat = model.startChat({
+            history: [
+                {
+                    role: 'user',
+                    parts: [{ text: `System Instruction: ${SYSTEM_PROMPT}\n\nPlease acknowledge and confirm you understand your role.` }],
+                },
+                {
+                    role: 'model',
+                    parts: [{ text: "I understand. I am VERIA ASSISTANT, a supportive and empathetic mental wellness companion. I will offer emotional support, help with reflection, and prioritize safety while maintaining professional boundaries. I am ready to listen." }],
+                },
+                ...history
+            ],
+            generationConfig: {
+                maxOutputTokens: 1000,
+            },
+        });
 
-            // Add image parts
-            matches.forEach((match) => {
-                const filename = match[1];
-                const filePath = path.join(process.cwd(), 'public', 'uploads', filename);
+        const lastMessage = messages[messages.length - 1];
+        const currentParts: any[] = [];
 
-                if (fs.existsSync(filePath)) {
-                    try {
-                        const fileBuffer = fs.readFileSync(filePath);
-                        const base64Image = fileBuffer.toString('base64');
-                        const ext = path.extname(filePath).toLowerCase();
-                        const mimeType = ext === '.png' ? 'image/png' : 'image/jpeg';
-                        const dataUrl = `data:${mimeType};base64,${base64Image}`;
+        // Process [Image: ...] tags
+        const imgRegex = /\[Image: \/uploads\/(.*?)\]/g;
+        const matches = [...lastMessage.content.matchAll(imgRegex)];
 
-                        contentParts.push({
-                            type: 'image_url',
-                            image_url: {
-                                url: dataUrl,
-                            },
-                        });
-                    } catch (e) {
-                        console.error('Error reading file for chat:', filename, e);
-                    }
+        // Add text content
+        const textContent = lastMessage.content.replace(imgRegex, '').trim();
+        if (textContent) {
+            currentParts.push({ text: textContent });
+        }
+
+        // Add images
+        for (const match of matches) {
+            const filename = match[1];
+            const filePath = path.join(process.cwd(), 'public', 'uploads', filename);
+
+            if (fs.existsSync(filePath)) {
+                try {
+                    const fileBuffer = fs.readFileSync(filePath);
+                    const base64Image = fileBuffer.toString('base64');
+                    const mimeType = filename.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
+
+                    currentParts.push({
+                        inlineData: {
+                            data: base64Image,
+                            mimeType: mimeType
+                        }
+                    });
+                } catch (e) {
+                    console.error('Error reading file:', filename, e);
                 }
-            });
+            }
+        }
 
-            return {
-                role: msg.role,
-                content: contentParts,
-            };
-        });
+        const result = await chat.sendMessage(currentParts);
+        const response = await result.response;
+        const text = response.text();
 
-        // Add system prompt
-        const fullMessages = [
-            { role: 'system', content: SYSTEM_PROMPT },
-            ...processedMessages,
-        ];
+        return NextResponse.json({ reply: text });
 
-        // Select model based on content
-        const model = hasImages
-            ? 'llama-3.2-90b-vision-preview'
-            : 'llama-3.3-70b-versatile';
-
-        const completion = await groq.chat.completions.create({
-            messages: fullMessages,
-            model: model,
-            temperature: 0.7,
-            max_tokens: 1024,
-            top_p: 1,
-            stop: null,
-            stream: false,
-        });
-
-        const replyText = completion.choices[0]?.message?.content || "I'm listening. Please go on.";
-
-        return NextResponse.json({ reply: replyText });
     } catch (err) {
         console.error('Error in /api/chat:', err);
         return NextResponse.json(
