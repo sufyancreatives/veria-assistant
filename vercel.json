@@ -1,0 +1,30 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "backend/src/index.js",
+            "use": "@vercel/node"
+        },
+        {
+            "src": "mental-wellness-bot/package.json",
+            "use": "@vercel/static-build",
+            "config": {
+                "distDir": "dist"
+            }
+        }
+    ],
+    "rewrites": [
+        {
+            "source": "/api/(.*)",
+            "destination": "backend/src/index.js"
+        },
+        {
+            "source": "/uploads/(.*)",
+            "destination": "backend/src/index.js"
+        },
+        {
+            "source": "/(.*)",
+            "destination": "mental-wellness-bot/$1"
+        }
+    ]
+}

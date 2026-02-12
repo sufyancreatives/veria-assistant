@@ -229,15 +229,19 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
     }
 });
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`✅ Server listening on port ${PORT}`);
-    if (
-        !process.env.BYTEZ_API_KEY ||
-        process.env.BYTEZ_API_KEY === "your_real_bytez_api_key_here"
-    ) {
-        console.warn(
-            "⚠️  WARNING: BYTEZ_API_KEY is not set. Add your key to backend/.env"
-        );
-    }
-});
+// Start server only if not running as a Vercel Function
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+    app.listen(PORT, () => {
+        console.log(`✅ Server listening on port ${PORT}`);
+        if (
+            !process.env.BYTEZ_API_KEY ||
+            process.env.BYTEZ_API_KEY === "your_real_bytez_api_key_here"
+        ) {
+            console.warn(
+                "⚠️  WARNING: BYTEZ_API_KEY is not set. Add your key to backend/.env"
+            );
+        }
+    });
+}
+
+export default app;
