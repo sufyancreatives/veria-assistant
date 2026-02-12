@@ -1,0 +1,196 @@
+/* ===================================================
+   CAMERA CAPTURE MODAL
+=================================================== */
+
+.camera-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.camera-modal {
+    width: 90%;
+    max-width: 600px;
+    background: rgba(30, 31, 40, 0.95);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.camera-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.camera-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    background: var(--color-accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.camera-close-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.camera-close-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--color-border-hover);
+    color: var(--color-text-primary);
+}
+
+.camera-content {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.camera-video,
+.captured-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.camera-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4);
+    padding: var(--space-6);
+    color: var(--color-text-primary);
+    text-align: center;
+}
+
+.error-icon {
+    font-size: 3rem;
+}
+
+.camera-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    background: rgba(20, 21, 28, 0.5);
+}
+
+.btn-capture {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-5);
+    background: transparent;
+    border: none;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-capture:hover {
+    transform: scale(1.05);
+}
+
+.capture-ring {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 4px solid var(--color-text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.btn-capture:hover .capture-ring {
+    border-color: var(--color-accent-secondary);
+    box-shadow: 0 0 20px rgba(124, 107, 255, 0.5);
+}
+
+.capture-inner {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--color-text-primary);
+    transition: all var(--transition-fast);
+}
+
+.btn-capture:hover .capture-inner {
+    background: var(--color-accent-secondary);
+}
+
+.btn-capture:active .capture-ring {
+    transform: scale(0.9);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .camera-modal {
+        width: 95%;
+        max-width: none;
+    }
+
+    .camera-content {
+        aspect-ratio: 3/4;
+    }
+
+    .camera-controls {
+        padding: var(--space-4);
+        gap: var(--space-3);
+    }
+
+    .capture-ring {
+        width: 56px;
+        height: 56px;
+    }
+
+    .capture-inner {
+        width: 44px;
+        height: 44px;
+    }
+}
