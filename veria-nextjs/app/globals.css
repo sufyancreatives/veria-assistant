@@ -38,30 +38,29 @@ body {
 
 /* Glassmorphism Card */
 .glass-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  background: rgba(30, 30, 46, 0.4);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
 /* Custom Scrollbar */
 .scrollbar-thin::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
+  background: transparent;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.5);
-  border-radius: 10px;
+  background: rgba(139, 92, 246, 0.3);
+  border-radius: 20px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.7);
+  background: rgba(139, 92, 246, 0.5);
 }
 
 /* Animations */
@@ -73,7 +72,7 @@ body {
   }
 
   50% {
-    transform: translateY(-20px);
+    transform: translateY(-12px);
   }
 }
 
@@ -85,7 +84,7 @@ body {
   }
 
   50% {
-    transform: translateY(-30px);
+    transform: translateY(-18px);
   }
 }
 
@@ -106,14 +105,18 @@ body {
   animation-delay: 0.2s;
 }
 
-/* Smooth transitions */
-* {
-  transition: background-color 0.3s ease, border-color 0.3s ease;
+/* Proper transitions to avoid layout thrashing */
+.transition-standard {
+  transition-property: background-color, border-color, color, opacity, transform;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-button,
-a {
-  transition: all 0.3s ease;
+button:not(.no-transition),
+a:not(.no-transition) {
+  transition-property: background-color, border-color, color, opacity, transform;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* 3D Card Effects */
