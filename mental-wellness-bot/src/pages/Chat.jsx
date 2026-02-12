@@ -11,7 +11,7 @@ import { saveChat, getChatHistory, exportChat, loadChat } from '../utils/chatSto
 import logo from '../assets/logo.png'
 import './Chat.css'
 
-const API_URL = 'http://localhost:4000/api/chat'
+const API_URL = '/api/chat'
 
 const WELCOME_MESSAGE = {
     id: 'welcome',
