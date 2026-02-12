@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Bytez from 'bytez.js';
+import Groq from 'groq-sdk';
 import fs from 'fs';
 import path from 'path';
 
-// Initialize Bytez SDK with API key from environment
-const sdk = new Bytez(process.env.BYTEZ_API_KEY || '');
-const model = sdk.model('google/gemini-1.5-flash');
+// Initialize Groq SDK
+const groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY,
+});
 
 // System prompt for mental wellness chatbot
 const SYSTEM_PROMPT = `
@@ -15,7 +16,7 @@ Your role:
 - Offer emotional support, active listening, and gentle coping suggestions.
 - Help users reflect on their thoughts and feelings.
 - Normalize seeking help from mental health professionals.
-- If the user shares an image (referenced as [Image: URL]), acknowledge it gently and ask how it relates to their feelings.
+- If the user shares an image, acknowledge it gently and ask how it relates to their feelings.
 
 You are NOT a therapist, doctor, or crisis counselor:
 - Do NOT claim to diagnose, treat, or cure any condition.
@@ -42,14 +43,10 @@ Style:
 - Use occasional gentle emoji (💙, 🌿, ✨) sparingly.
 `.trim();
 
-interface Message {
-    role: string;
-    content: string;
-}
-
 export async function POST(request: NextRequest) {
     try {
-        const { messages } = await request.json();
+        const body = await request.json();
+        const { messages } = body;
 
         if (!Array.isArray(messages)) {
             return NextResponse.json(
@@ -58,27 +55,28 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Helper to process messages with images
-        const processMessage = (msg: Message) => {
+        let hasImages = false;
+
+        // Process messages to convert [Image: ...] tags to Groq vision format
+        const processedMessages = messages.map((msg: any) => {
             // Regex to find [Image: /uploads/filename]
             const imgRegex = /\[Image: \/uploads\/(.*?)\]/g;
             const matches = [...msg.content.matchAll(imgRegex)];
 
             if (matches.length === 0) {
-                // Return text-only message in Gemini format
                 return {
-                    role: msg.role === 'assistant' ? 'model' : msg.role,
-                    parts: [{ text: msg.content }],
+                    role: msg.role,
+                    content: msg.content,
                 };
             }
 
-            // It has images. Construct Gemini native structured content
-            const parts: any[] = [];
+            hasImages = true;
+            const contentParts: any[] = [];
 
-            // Add the text part (with image markers removed)
+            // Add text part (with image markers removed)
             const textContent = msg.content.replace(imgRegex, '').trim();
             if (textContent) {
-                parts.push({ text: textContent });
+                contentParts.push({ type: 'text', text: textContent });
             }
 
             // Add image parts
@@ -92,11 +90,12 @@ export async function POST(request: NextRequest) {
                         const base64Image = fileBuffer.toString('base64');
                         const ext = path.extname(filePath).toLowerCase();
                         const mimeType = ext === '.png' ? 'image/png' : 'image/jpeg';
+                        const dataUrl = `data:${mimeType};base64,${base64Image}`;
 
-                        parts.push({
-                            inlineData: {
-                                mimeType: mimeType,
-                                data: base64Image,
+                        contentParts.push({
+                            type: 'image_url',
+                            image_url: {
+                                url: dataUrl,
                             },
                         });
                     } catch (e) {
@@ -106,45 +105,33 @@ export async function POST(request: NextRequest) {
             });
 
             return {
-                role: msg.role === 'assistant' ? 'model' : msg.role,
-                parts: parts,
+                role: msg.role,
+                content: contentParts,
             };
-        };
+        });
 
-        const processedMessages = messages.map(processMessage);
-
-        // Build full conversation for the model
+        // Add system prompt
         const fullMessages = [
-            { role: 'system', parts: [{ text: SYSTEM_PROMPT }] },
+            { role: 'system', content: SYSTEM_PROMPT },
             ...processedMessages,
         ];
 
-        // Call Bytez model
-        const { error, output } = await model.run(fullMessages);
+        // Select model based on content
+        const model = hasImages
+            ? 'llama-3.2-90b-vision-preview'
+            : 'llama-3.3-70b-versatile';
 
-        if (error) {
-            console.error('Bytez error:', error);
-            // Fallback response
-            return NextResponse.json({
-                reply: "I see you shared something, but I'm having a little trouble processing it right now. Could you tell me more about it in your own words? 🌿",
-            });
-        }
+        const completion = await groq.chat.completions.create({
+            messages: fullMessages,
+            model: model,
+            temperature: 0.7,
+            max_tokens: 1024,
+            top_p: 1,
+            stop: null,
+            stream: false,
+        });
 
-        // Extract reply from output
-        let replyText = '';
-
-        if (typeof output === 'string') {
-            replyText = output;
-        } else if (Array.isArray(output)) {
-            replyText = output[0]?.content || '';
-        } else if (output && (output as any).content) {
-            replyText = (output as any).content;
-        }
-
-        if (!replyText) {
-            console.warn('Empty AI response', output);
-            return NextResponse.json({ reply: "I'm listening. Please go on." });
-        }
+        const replyText = completion.choices[0]?.message?.content || "I'm listening. Please go on.";
 
         return NextResponse.json({ reply: replyText });
     } catch (err) {
